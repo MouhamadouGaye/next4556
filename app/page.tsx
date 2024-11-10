@@ -1,8 +1,9 @@
-
 import fs from "fs";
 import path from "path";
 import Link from "next/link";
+import Image from "next/image";
 import matter from "gray-matter";
+import { GetStaticProps } from "next";
 
 interface PostMetadata {
   slug: string;
@@ -23,6 +24,11 @@ const getPostsMetaData = (): PostMetadata[] => {
     const filePath = path.join(folder, file);
     const fileContents = fs.readFileSync(filePath, "utf8");
     const { data } = matter(fileContents);
+
+    if (!data.title || !data.subtitle || !data.date) {
+      throw new Error(`Markdown file "${file}" is missing required metadata.`);
+    }
+
     return {
       slug,
       title: data.title,
@@ -33,11 +39,18 @@ const getPostsMetaData = (): PostMetadata[] => {
   });
 };
 
-export default function HomePage() {
+export const getStaticProps: GetStaticProps = async () => {
   const posts = getPostsMetaData();
+  return { props: { posts } };
+};
 
+interface HomePageProps {
+  posts: PostMetadata[];
+}
+
+export default function HomePage({ posts }: HomePageProps) {
   return (
-    <div className="bg-highlight  min-h-screen p-10 text-primary font-sans">
+    <div className="bg-highlight min-h-screen p-10 text-primary font-sans">
       <h1 className="text-4xl font-bold mb-6 text-center">
         Welcome to My Blog
       </h1>
@@ -46,10 +59,13 @@ export default function HomePage() {
           <Link href={`/posts/${slug}`} key={slug}>
             <div className="bg-background p-6 rounded-lg shadow-md hover:shadow-lg transform transition duration-300 hover:scale-105">
               {image && (
-                <img
+                <Image
                   src={image}
                   alt={title}
+                  width={500}
+                  height={200}
                   className="rounded-md mb-4 w-full h-48 object-cover"
+                  priority
                 />
               )}
               <h2 className="text-2xl font-semibold text-primary">{title}</h2>
@@ -65,3 +81,4 @@ export default function HomePage() {
     </div>
   );
 }
+
