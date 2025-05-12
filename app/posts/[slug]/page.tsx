@@ -6,12 +6,11 @@ import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import { notFound } from "next/navigation";
 
-interface PostPageProps {
+type Props = {
   params: {
     slug: string;
   };
-}
-
+};
 interface PostMetadata {
   title: string;
   subtitle: string;
@@ -19,7 +18,9 @@ interface PostMetadata {
   image?: string;
 }
 
-const getPostContent = (slug: string): { content: string; metadata: PostMetadata } | null => {
+const getPostContent = (
+  slug: string
+): { content: string; metadata: PostMetadata } | null => {
   try {
     const filePath = path.join(process.cwd(), "posts", `${slug}.md`);
     const fileContents = fs.readFileSync(filePath, "utf8");
@@ -40,7 +41,7 @@ export async function generateStaticParams() {
 }
 
 // ✅ Must be async
-export default async function PostPage({ params }: PostPageProps) {
+export default async function PostPage({ params }: Props) {
   const post = getPostContent(params.slug);
 
   if (!post) {
@@ -69,3 +70,4 @@ export default async function PostPage({ params }: PostPageProps) {
     </div>
   );
 }
+
