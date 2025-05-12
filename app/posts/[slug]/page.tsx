@@ -1,3 +1,4 @@
+// app/posts/[slug]/page.tsx
 import fs from "fs";
 import path from "path";
 import matter from "gray-matter";
@@ -11,25 +12,36 @@ interface PostPageProps {
   };
 }
 
-// Reading the markdown file content asynchronously
-const getPostContent = (
-  slug: string
-): { content: string; metadata: any } | null => {
+interface PostMetadata {
+  title: string;
+  subtitle: string;
+  date: string;
+  image?: string;
+}
+
+const getPostContent = (slug: string): { content: string; metadata: PostMetadata } | null => {
   try {
-    const folder = path.join(process.cwd(), "posts");
-    const filePath = path.join(folder, `${slug}.md`);
+    const filePath = path.join(process.cwd(), "posts", `${slug}.md`);
     const fileContents = fs.readFileSync(filePath, "utf8");
     const { content, data } = matter(fileContents);
-    return { content, metadata: data };
-  } catch (error) {
-    console.error("Error loading content:", error);
+    return { content, metadata: data as PostMetadata };
+  } catch {
     return null;
   }
 };
 
-export default function PostPage({ params }: PostPageProps) {
-  const { slug } = params;
-  const post = getPostContent(slug);
+export async function generateStaticParams() {
+  const folder = path.join(process.cwd(), "posts");
+  const files = fs.readdirSync(folder);
+
+  return files.map((filename) => ({
+    slug: filename.replace(".md", ""),
+  }));
+}
+
+// ✅ Must be async
+export default async function PostPage({ params }: PostPageProps) {
+  const post = getPostContent(params.slug);
 
   if (!post) {
     notFound();
@@ -57,4 +69,3 @@ export default function PostPage({ params }: PostPageProps) {
     </div>
   );
 }
-
