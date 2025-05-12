@@ -1,4 +1,3 @@
-
 import fs from "fs";
 import path from "path";
 import matter from "gray-matter";
@@ -27,7 +26,7 @@ const getPostContent = (
   }
 };
 
-const PostPage: React.FC<PostPageProps> = async ({ params }) => {
+export default async function PostPage({ params }: PostPageProps) {
   const { slug } = params;
   const post = getPostContent(slug);
 
@@ -56,6 +55,5 @@ const PostPage: React.FC<PostPageProps> = async ({ params }) => {
       </article>
     </div>
   );
-};
+}
 
-export default PostPage;
