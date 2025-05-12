@@ -1,4 +1,5 @@
 // app/posts/[slug]/page.tsx
+
 import fs from "fs";
 import path from "path";
 import matter from "gray-matter";
@@ -6,11 +7,6 @@ import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import { notFound } from "next/navigation";
 
-type Props = {
-  params: {
-    slug: string;
-  };
-};
 interface PostMetadata {
   title: string;
   subtitle: string;
@@ -18,31 +14,30 @@ interface PostMetadata {
   image?: string;
 }
 
-const getPostContent = (
+interface Props {
+  params: {
+    slug: string;
+  };
+}
+
+const getPostContent = async (
   slug: string
-): { content: string; metadata: PostMetadata } | null => {
+): Promise<{ content: string; metadata: PostMetadata } | null> => {
   try {
-    const filePath = path.join(process.cwd(), "posts", `${slug}.md`);
+    const folder = path.join(process.cwd(), "posts");
+    const filePath = path.join(folder, `${slug}.md`);
     const fileContents = fs.readFileSync(filePath, "utf8");
     const { content, data } = matter(fileContents);
     return { content, metadata: data as PostMetadata };
-  } catch {
+  } catch (error) {
+    console.error("Error loading content:", error);
     return null;
   }
 };
 
-export async function generateStaticParams() {
-  const folder = path.join(process.cwd(), "posts");
-  const files = fs.readdirSync(folder);
-
-  return files.map((filename) => ({
-    slug: filename.replace(".md", ""),
-  }));
-}
-
-// ✅ Must be async
 export default async function PostPage({ params }: Props) {
-  const post = getPostContent(params.slug);
+  const { slug } = params;
+  const post = await getPostContent(slug);
 
   if (!post) {
     notFound();
@@ -70,4 +65,5 @@ export default async function PostPage({ params }: Props) {
     </div>
   );
 }
+
 
