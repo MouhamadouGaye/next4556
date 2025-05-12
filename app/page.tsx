@@ -1,9 +1,9 @@
+// app/page.tsx (App Router compatible)
 import fs from "fs";
 import path from "path";
 import Link from "next/link";
 import Image from "next/image";
 import matter from "gray-matter";
-import { GetStaticProps } from "next";
 
 interface PostMetadata {
   slug: string;
@@ -13,7 +13,6 @@ interface PostMetadata {
   image?: string;
 }
 
-// Function to get metadata from markdown files
 const getPostsMetaData = (): PostMetadata[] => {
   const folder = path.join(process.cwd(), "posts");
   const files = fs.readdirSync(folder);
@@ -25,10 +24,6 @@ const getPostsMetaData = (): PostMetadata[] => {
     const fileContents = fs.readFileSync(filePath, "utf8");
     const { data } = matter(fileContents);
 
-    if (!data.title || !data.subtitle || !data.date) {
-      throw new Error(`Markdown file "${file}" is missing required metadata.`);
-    }
-
     return {
       slug,
       title: data.title,
@@ -39,16 +34,9 @@ const getPostsMetaData = (): PostMetadata[] => {
   });
 };
 
-export const getStaticProps: GetStaticProps = async () => {
+export default async function HomePage() {
   const posts = getPostsMetaData();
-  return { props: { posts } };
-};
 
-interface HomePageProps {
-  posts: PostMetadata[];
-}
-
-export default function HomePage({ posts }: HomePageProps) {
   return (
     <div className="bg-highlight min-h-screen p-10 text-primary font-sans">
       <h1 className="text-4xl font-bold mb-6 text-center">
@@ -81,4 +69,5 @@ export default function HomePage({ posts }: HomePageProps) {
     </div>
   );
 }
+
 
