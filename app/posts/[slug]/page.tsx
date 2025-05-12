@@ -11,6 +11,7 @@ interface PostPageProps {
   };
 }
 
+// Reading the markdown file content asynchronously
 const getPostContent = (
   slug: string
 ): { content: string; metadata: any } | null => {
@@ -26,7 +27,7 @@ const getPostContent = (
   }
 };
 
-export default async function PostPage({ params }: PostPageProps) {
+export default function PostPage({ params }: PostPageProps) {
   const { slug } = params;
   const post = getPostContent(slug);
 
